@@ -1,0 +1,2627 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCServer1523</title>
+  <meta name="description" content="Minecraft-Server Homepage mit Karte, Regeln, Modpack und Einstellungen.">
+  <meta name="theme-color" content="#050505">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MCServer1523">
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-dark: #050505;
+      --sidebar-bg: rgba(15, 15, 15, 0.75);
+      --accent-glow: rgba(79, 70, 229, 0.15);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --fluid-ease: cubic-bezier(0.4, 0, 0.2, 1);
+      --collapsed-width: 81px;
+      --expanded-width: 241px;
+      --item-height: 48px;
+      --side-padding: 16px;
+      --text-main: #e2e8f0;
+      --text-soft: #94a3b8;
+      --text-muted: #64748b;
+      --panel: rgba(255, 255, 255, 0.03);
+      --panel-2: rgba(255, 255, 255, 0.04);
+      --accent: #818cf8;
+    }
+
+    :root.light {
+      color-scheme: light;
+      --bg-dark: #f5f7fb;
+      --sidebar-bg: rgba(255, 255, 255, 0.82);
+      --accent-glow: rgba(79, 70, 229, 0.08);
+      --card-border: rgba(15, 23, 42, 0.08);
+      --text-main: #0f172a;
+      --text-soft: #475569;
+      --text-muted: #64748b;
+      --panel: rgba(255, 255, 255, 0.74);
+      --panel-2: rgba(255, 255, 255, 0.88);
+      --accent: #4f46e5;
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: none;
+    }
+
+    *::-webkit-scrollbar {
+      display: none;
+    }
+
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+    }
+
+    @media (max-width: 1100px) {
+      body {
+        overflow: auto;
+      }
+    }
+
+    .gradient-bg {
+      background:
+        radial-gradient(circle at 0% 0%, var(--accent-glow) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.05) 0%, transparent 40%),
+        var(--bg-dark);
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+    }
+
+    #sidebar {
+      width: var(--collapsed-width);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(24px);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 100;
+      transition: width 0.4s var(--fluid-ease), transform 0.3s var(--fluid-ease);
+      flex-shrink: 0;
+    }
+
+    #sidebar.expanded {
+      width: var(--expanded-width);
+    }
+
+    @media (max-width: 1100px) {
+      :root {
+        --collapsed-width: 64px;
+        --expanded-width: 200px;
+        --side-padding: 10px;
+        --item-height: 44px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --collapsed-width: 56px;
+        --expanded-width: 180px;
+        --side-padding: 8px;
+        --item-height: 42px;
+      }
+    }
+
+    .brand-icon {
+      height: 80px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      height: var(--item-height);
+      margin: 6px 0;
+      width: var(--item-height);
+      border-radius: 14px;
+      color: var(--text-soft);
+      transition: background 0.3s ease, color 0.3s ease, width 0.4s var(--fluid-ease);
+      cursor: pointer;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      border: 1px solid transparent;
+      margin-left: var(--side-padding);
+      background: transparent;
+    }
+
+    #sidebar.expanded .nav-item {
+      width: calc(100% - var(--side-padding) * 2);
+    }
+
+    .nav-item.active {
+      background: rgba(79, 70, 229, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .icon-box {
+      width: var(--item-height);
+      min-width: var(--item-height);
+      height: var(--item-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-box svg {
+      transform: translateX(-1px);
+      transition: transform 0.2s var(--fluid-ease);
+    }
+
+    .nav-item:hover svg {
+      transform: translateX(-1px) scale(1.15);
+    }
+
+    .label-text {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity 0.3s var(--fluid-ease), transform 0.3s var(--fluid-ease);
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
+    #sidebar.expanded .label-text {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .bottom-nav .nav-item {
+      margin: 8px 0;
+      margin-left: var(--side-padding);
+    }
+
+    #main-viewport {
+      flex: 1;
+      padding: clamp(16px, 2.5vw, 40px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 1100px) {
+      #main-viewport {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      #main-viewport {
+        padding: 16px;
+      }
+    }
+
+    .mobile-topbar {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      background: var(--panel);
+      color: var(--text-main);
+      font-weight: 800;
+    }
+
+    .page-view {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .page-view.active {
+      display: flex;
+    }
+
+    #view-map.page-view.active {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .section-title {
+      font-size: 1.875rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .section-subtitle {
+      margin-top: 6px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .panel,
+    .stat-card,
+    .rule-card,
+    .mod-card,
+    .setting-card,
+    .sort-item {
+      background: var(--panel);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+
+    .panel {
+      padding: 22px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      padding: 18px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    .map-shell {
+      overflow: hidden;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      background: var(--panel-2);
+      min-height: 28rem;
+    }
+
+    .map-shell iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 28rem;
+      border: 0;
+    }
+
+    .map-shell.fullscreen {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      border-radius: 24px;
+    }
+
+    .map-shell.fullscreen iframe {
+      min-height: 100%;
+      height: 100%;
+    }
+
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .rule-card {
+      padding: 18px;
+    }
+
+    .rule-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .rule-text {
+      margin-top: 12px;
+      color: var(--text-soft);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    .mods-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mod-card {
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.2s var(--fluid-ease), transform 0.2s var(--fluid-ease), border-color 0.2s var(--fluid-ease);
+    }
+
+    .mod-card:hover {
+      background: var(--panel-2);
+      transform: translateY(-2px);
+    }
+
+    .mod-link-icon {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      min-height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+
+    .mod-link-icon svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      stroke-width: 2;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .home-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      font-weight: 800;
+      text-decoration: none;
+      transition: background 0.2s var(--fluid-ease), transform 0.2s var(--fluid-ease);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+      gap: 18px;
+    }
+
+    .setting-card {
+      padding: 20px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .setting-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .setting-row:first-child {
+      padding-top: 0;
+    }
+
+    .sort-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .sort-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      cursor: grab;
+      transition: border-color 0.2s var(--fluid-ease), background 0.2s var(--fluid-ease), transform 0.2s var(--fluid-ease);
+    }
+
+    .sort-item.dragging {
+      opacity: 0.45;
+      transform: scale(0.98);
+    }
+
+    .sort-item.drag-over {
+      border-color: rgba(79, 70, 229, 0.35);
+      background: rgba(79, 70, 229, 0.08);
+    }
+
+    .sort-item-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .sort-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .sort-mobile-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-move-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background 0.2s var(--fluid-ease), border-color 0.2s var(--fluid-ease), color 0.2s var(--fluid-ease);
+    }
+
+    .sort-move-btn:disabled {
+      opacity: 0.45;
+    }
+
+    .sort-move-btn:not(:disabled):hover {
+      background: rgba(79, 70, 229, 0.12);
+      border-color: rgba(79, 70, 229, 0.25);
+      color: var(--text-main);
+    }
+
+    .sort-item.touch-dragging {
+      opacity: 0.7;
+      transform: scale(0.985);
+    }
+
+    .notice {
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--card-border);
+      background: var(--panel);
+      color: var(--text-soft);
+      line-height: 1.7;
+    }
+
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      display: none;
+      z-index: 90;
+    }
+
+    .mobile-overlay.show {
+      display: block;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 130;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .settings-modal-card {
+      width: 100%;
+      max-width: 880px;
+      background: var(--panel-2);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 22px;
+    }
+
+    .settings-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+    }
+
+    .settings-modal-title {
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .modal-small {
+      max-width: 560px;
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
+    .news-feed,
+    .admin-post-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .news-card {
+      gap: 20px;
+      padding: 26px;
+    }
+
+    .news-card-header,
+    .admin-post-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .news-title,
+    .admin-post-title {
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.15;
+    }
+
+    .news-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .news-date {
+      margin-top: 4px;
+      text-align: right;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .markdown-body {
+      color: var(--text-soft);
+      line-height: 1.9;
+      font-size: 1.08rem;
+      overflow-wrap: anywhere;
+    }
+
+    .markdown-body > :first-child {
+      margin-top: 0;
+    }
+
+    .markdown-body > :last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4 {
+      color: var(--text-main);
+      margin: 1.2rem 0 0.7rem;
+      font-weight: 800;
+    }
+
+    .markdown-body p,
+    .markdown-body ul,
+    .markdown-body ol,
+    .markdown-body blockquote,
+    .markdown-body pre {
+      margin: 0 0 1rem;
+    }
+
+    .markdown-body code {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 0.9em;
+    }
+
+    .markdown-body pre {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--card-border);
+      overflow-x: auto;
+    }
+
+    .markdown-body blockquote {
+      padding-left: 16px;
+      border-left: 3px solid rgba(79, 70, 229, 0.35);
+      color: var(--text-soft);
+    }
+
+    .markdown-body a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .news-media-grid,
+    .existing-media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .news-media-card,
+    .existing-media-card {
+      overflow: hidden;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+      display: block;
+      position: relative;
+    }
+
+    .news-media-card img,
+    .news-media-card video,
+    .existing-media-card img,
+    .existing-media-card video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      display: block;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .upload-file-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .upload-file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .upload-file-copy {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .upload-file-name {
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 0.94rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .upload-file-meta {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.9fr);
+      gap: 18px;
+    }
+
+    .admin-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .input-label {
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .text-input,
+    .text-area,
+    .file-input {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+      padding: 14px 16px;
+      font: inherit;
+      outline: none;
+    }
+
+    .text-input:focus,
+    .text-area:focus,
+    .file-input:focus {
+      border-color: rgba(79, 70, 229, 0.35);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    .text-area {
+      min-height: 240px;
+      resize: vertical;
+    }
+
+    .file-input {
+      padding-block: 11px;
+    }
+
+    .admin-post-card {
+      padding: 16px;
+      border-radius: 22px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .btn-compact {
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+    }
+
+    .btn-danger {
+      border-color: rgba(239, 68, 68, 0.22);
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.18);
+    }
+
+    .btn-danger:hover {
+      background: rgba(127, 29, 29, 0.28);
+    }
+
+    .toggle-remove-btn {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      border: 1px solid var(--card-border);
+      background: rgba(15, 15, 15, 0.7);
+      color: var(--text-main);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      backdrop-filter: blur(12px);
+    }
+
+    .existing-media-card.marked-remove {
+      border-color: rgba(239, 68, 68, 0.35);
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) inset;
+    }
+
+    .danger-active {
+      background: rgba(127, 29, 29, 0.82);
+      color: #fee2e2;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-soft);
+    }
+
+    .small-empty {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px dashed var(--card-border);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .stat-grid,
+      .rule-grid,
+      .mods-grid,
+      .settings-grid,
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .settings-modal-header {
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .home-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .home-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .home-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding-inline: 12px;
+      }
+
+      .news-card-header,
+      .admin-post-card-head {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .sort-item {
+        cursor: default;
+      }
+
+      .mobile-topbar {
+        display: block;
+      }
+
+      #sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        transform: translateX(-100%);
+        width: min(84vw, 280px);
+      }
+
+      #sidebar.expanded,
+      #sidebar.mobile-open {
+        width: min(84vw, 280px);
+        transform: translateX(0);
+      }
+
+      #sidebar .label-text {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      #sidebar .nav-item {
+        width: calc(100% - var(--side-padding) * 2);
+      }
+
+      .settings-modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="mobileOverlay" class="mobile-overlay"></div>
+
+  <div class="gradient-bg">
+    <aside id="sidebar">
+      <div class="brand-icon" onclick="toggleSidebar()">
+        <div class="icon-box"><i data-lucide="layout-grid" class="w-6 h-6"></i></div>
+      </div>
+
+      <nav id="mainNav" class="mt-2 flex-1 nav-list"></nav>
+
+      <div class="bottom-nav mb-4" id="bottomNav"></div>
+    </aside>
+
+    <main id="main-viewport">
+      <div class="mobile-topbar">
+        <button id="mobileMenuButton" type="button" class="mobile-menu-btn">
+          <i data-lucide="menu" class="w-4 h-4"></i>
+          Menü
+        </button>
+      </div>
+
+      <section id="view-home" class="page-view active">
+        <header class="section-header home-header">
+          <div>
+            <h1 class="section-title">Home</h1>
+            <p class="section-subtitle">Serverstatus</p>
+          </div>
+          <div class="actions home-actions">
+            <button id="copyIpButton" type="button" class="btn">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span id="copyIpButtonLabel">IP kopieren</span>
+            </button>
+            <button id="refreshStatusButton" type="button" class="btn">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              Aktualisieren
+            </button>
+          </div>
+        </header>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Server-IP</div>
+            <div class="stat-value">mcserver1523.duckdns.org</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Status</div>
+            <div id="heroStatus" class="stat-value">Wird geladen...</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Spieler</div>
+            <div id="heroPlayers" class="stat-value">-</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <img id="serverIcon" alt="Server Icon" class="h-16 w-16 rounded-2xl border border-[color:var(--card-border)] bg-black/20 object-cover p-1" src="assets/pack.png">
+              <div>
+                <div id="homeStatus" class="text-xl font-extrabold text-[var(--text-main)]">Verbinde...</div>
+                <div id="homeLatency" class="mt-1 text-sm text-[var(--text-soft)]">Latenz wird geprüft</div>
+              </div>
+            </div>
+            <div class="chip" id="motdBadge">Minecraft</div>
+          </div>
+          <div id="serverMotd" class="mt-5 text-sm leading-7 text-[var(--text-soft)]">Wird geladen...</div>
+        </div>
+
+        <div class="map-shell">
+          <iframe id="homeMapFrame" data-map-frame title="Serverkarte" src="https://mcserver1523.duckdns.org:8080/map.html" loading="lazy" referrerpolicy="no-referrer"></iframe>
+        </div>
+      </section>
+
+      <section id="view-news" class="page-view">
+        <header class="section-header">
+          <div>
+            <h1 class="section-title">News</h1>
+            <p class="section-subtitle">Posts und Updates vom Server</p>
+          </div>
+          <button id="refreshNewsButton" type="button" class="btn">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            Aktualisieren
+          </button>
+        </header>
+
+        <div id="newsNotice" class="notice">News werden geladen...</div>
+        <div id="newsFeed" class="news-feed"></div>
+      </section>
+
+      <section id="view-map" class="page-view">
+        <div class="map-shell fullscreen">
+          <iframe id="mapPageFrame" data-map-frame title="Minecraft Karte" src="https://mcserver1523.duckdns.org:8080/map.html" loading="lazy" referrerpolicy="no-referrer"></iframe>
+        </div>
+      </section>
+
+      <section id="view-regeln" class="page-view">
+        <header class="section-header">
+          <div>
+            <h1 class="section-title">Regeln</h1>
+          </div>
+        </header>
+
+        <div class="rule-grid">
+          <article class="rule-card">
+            <div class="rule-title"><i data-lucide="shield-check" class="w-5 h-5 text-indigo-400"></i>Respekt</div>
+            <div class="rule-text">Sei freundlich und respektvoll im Chat und Voice-Chat.</div>
+          </article>
+          <article class="rule-card">
+            <div class="rule-title"><i data-lucide="pickaxe" class="w-5 h-5 text-emerald-400"></i>Fair spielen</div>
+            <div class="rule-text">Nicht griefen, nicht klauen und PvP nur mit Zustimmung.</div>
+          </article>
+          <article class="rule-card">
+            <div class="rule-title"><i data-lucide="cpu" class="w-5 h-5 text-cyan-400"></i>Lag vermeiden</div>
+            <div class="rule-text">Baue nichts, was viel Lag macht.</div>
+          </article>
+          <article class="rule-card">
+            <div class="rule-title"><i data-lucide="scan-search" class="w-5 h-5 text-amber-400"></i>Keine Cheats</div>
+            <div class="rule-text">Keine Cheats, X-Ray oder Exploits.</div>
+          </article>
+          <article class="rule-card">
+            <div class="rule-title"><i data-lucide="message-square-warning" class="w-5 h-5 text-orange-400"></i>Kein Spam oder Lärm</div>
+            <div class="rule-text">Kein Spam, kein Soundboard-Spam und kein unnötiges Schreien.</div>
+          </article>
+          <article class="rule-card">
+            <div class="rule-title"><i data-lucide="heart-handshake" class="w-5 h-5 text-pink-400"></i>Admins</div>
+            <div class="rule-text">Im Zweifel entscheiden die Admins.</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-modpack" class="page-view">
+        <header class="section-header">
+          <div>
+            <h1 class="section-title">Modpack</h1>
+          </div>
+          <a href="assets/modpack.mrpack" download class="btn">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Download
+          </a>
+        </header>
+
+        <div id="modpackNotice" class="notice">Modliste wird geladen...</div>
+        <div id="modsGrid" class="mods-grid mt-4"></div>
+      </section>
+
+      <section id="view-admin" class="page-view">
+        <header class="section-header">
+          <div>
+            <h1 class="section-title">Admin-Panel</h1>
+            <p class="section-subtitle">News-Posts verwalten</p>
+          </div>
+        </header>
+
+        <div id="adminLockedNotice" class="notice">
+          <div>Bitte melde dich als Admin an, um Posts zu erstellen, zu bearbeiten oder zu löschen.</div>
+          <button id="adminLockedLoginButton" type="button" class="btn mt-4">
+            <i data-lucide="shield-lock" class="w-4 h-4"></i>
+            Admin Login
+          </button>
+        </div>
+
+        <div id="adminPanelContent" class="admin-layout is-hidden">
+          <section class="panel">
+            <div class="section-header">
+              <div>
+                <h2 id="adminEditorTitle" class="section-title text-[1.35rem]">Neuen Post erstellen</h2>
+                <p id="adminSessionText" class="section-subtitle"></p>
+              </div>
+            </div>
+
+            <form id="adminPostForm" class="admin-form">
+              <label class="input-label" for="adminPostTitle">Titel</label>
+              <input id="adminPostTitle" class="text-input" type="text" maxlength="120" required>
+
+              <label class="input-label" for="adminPostMarkdown">Inhalt</label>
+              <textarea id="adminPostMarkdown" class="text-area" rows="12" placeholder="Markdown wird unterstützt." required></textarea>
+
+              <label class="input-label" for="adminMediaInput">Bilder oder Videos</label>
+              <input id="adminMediaInput" class="file-input" type="file" accept="image/*,video/*" multiple>
+              <div class="section-subtitle">Du kannst mehrere Dateien gleichzeitig auswaehlen oder weitere spaeter hinzufuegen.</div>
+              <div id="pendingMediaList" class="upload-file-list is-hidden"></div>
+
+              <div id="existingMediaSection" class="is-hidden">
+                <div class="input-label">Vorhandene Medien</div>
+                <div id="existingMediaGrid" class="existing-media-grid"></div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn">
+                  <i data-lucide="save" class="w-4 h-4"></i>
+                  <span id="adminPostSubmitLabel">Post erstellen</span>
+                </button>
+                <button id="cancelEditButton" type="button" class="btn is-hidden">
+                  <i data-lucide="x-circle" class="w-4 h-4"></i>
+                  Abbrechen
+                </button>
+              </div>
+
+              <div id="adminPostStatus" class="section-subtitle"></div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title text-[1.35rem]">Vorhandene Posts</h2>
+              </div>
+            </div>
+            <div id="adminPostsList" class="admin-post-list"></div>
+          </section>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="settingsModal" class="modal-overlay">
+    <div class="settings-modal-card" onclick="event.stopPropagation()">
+      <div class="settings-modal-header">
+        <div>
+          <h2 class="section-title settings-modal-title">Einstellungen</h2>
+        </div>
+        <button id="closeSettingsButton" type="button" class="btn">
+          <i data-lucide="x" class="w-4 h-4"></i>
+          Schließen
+        </button>
+      </div>
+
+      <div class="settings-grid">
+        <div class="setting-card">
+          <div class="setting-row">
+            <div>
+              <div class="font-extrabold text-[var(--text-main)]">Dark / Light Mode</div>
+            </div>
+            <button id="themeToggle" type="button" class="btn">
+              <i data-lucide="moon-star" class="w-4 h-4"></i>
+              <span id="themeToggleLabel">Dark aktiv</span>
+            </button>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="font-extrabold text-[var(--text-main)]">Admin</div>
+            </div>
+            <div class="actions">
+              <div id="adminStatusChip" class="chip">Nicht eingeloggt</div>
+              <button id="adminAuthButton" type="button" class="btn">
+                <i data-lucide="shield-lock" class="w-4 h-4"></i>
+                Admin Login
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="font-extrabold text-[var(--text-main)]">Browser-Cache</div>
+              <div id="cacheStatusText" class="section-subtitle">Map-Daten werden automatisch frisch geladen.</div>
+            </div>
+            <button id="clearCacheButton" type="button" class="btn">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              Cache leeren
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="flex items-center justify-between gap-4">
+            <div class="font-extrabold text-[var(--text-main)]">Reihenfolge</div>
+            <button id="resetOrderButton" type="button" class="btn">Reset</button>
+          </div>
+          <div id="sortList" class="sort-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminLoginModal" class="modal-overlay">
+    <div class="settings-modal-card modal-small" onclick="event.stopPropagation()">
+      <div class="settings-modal-header">
+        <div>
+          <h2 class="section-title settings-modal-title">Admin Login</h2>
+        </div>
+        <button id="closeAdminLoginButton" type="button" class="btn">
+          <i data-lucide="x" class="w-4 h-4"></i>
+          Schließen
+        </button>
+      </div>
+
+      <form id="adminLoginForm" class="admin-form">
+        <label class="input-label" for="adminUsernameInput">Benutzername</label>
+        <input id="adminUsernameInput" class="text-input" type="text" autocomplete="username" value="admin" required>
+
+        <label class="input-label" for="adminPasswordInput">Passwort</label>
+        <input id="adminPasswordInput" class="text-input" type="password" autocomplete="current-password" required>
+
+        <div class="actions">
+          <button type="submit" class="btn">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            Einloggen
+          </button>
+        </div>
+
+        <div id="adminLoginStatus" class="section-subtitle"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+const SERVER_IP = "mcserver1523.duckdns.org";
+const SERVER_PORT = 25565;
+const PACK_ICON = "assets/pack.png";
+const MODPACK_URL = "assets/modpack.mrpack";
+const MAP_URL = "https://mcserver1523.duckdns.org:8080/map.html";
+const STORAGE_KEY = "mcserver1523.homepage.v4";
+const ADMIN_SESSION_KEY = "mcserver1523.news.admin.v1";
+const CACHE_META_KEY = "mcserver1523.homepage.cache.v1";
+const CACHE_MAX_AGE_MS = 20 * 60 * 1000;
+const NEWS_API_ORIGIN = "https://mcserver1523.duckdns.org:8080";
+const NEWS_API_BASE = `${NEWS_API_ORIGIN}/news-api`;
+const DEFAULT_TAB_ORDER = ["home", "news", "map", "regeln", "modpack"];
+const TAB_DEFINITIONS = {
+  home: { label: "Home", icon: "home", color: "text-indigo-400" },
+  news: { label: "News", icon: "newspaper", color: "text-rose-400" },
+  map: { label: "Map", icon: "map", color: "text-cyan-400" },
+  regeln: { label: "Regeln", icon: "scroll-text", color: "text-amber-400" },
+  modpack: { label: "Modpack", icon: "package", color: "text-emerald-400" },
+  admin: { label: "Admin-Panel", icon: "shield", color: "text-red-400" },
+  einstellungen: { label: "Einstellungen", icon: "settings", color: "text-slate-400" }
+};
+
+const appState = loadState();
+const adminState = loadAdminSession();
+const newsState = {
+  posts: []
+};
+const adminEditorState = {
+  editingId: null,
+  removeMedia: new Set()
+};
+
+const sidebar = document.getElementById("sidebar");
+const mobileOverlay = document.getElementById("mobileOverlay");
+const mobileMenuButton = document.getElementById("mobileMenuButton");
+const settingsModal = document.getElementById("settingsModal");
+const closeSettingsButton = document.getElementById("closeSettingsButton");
+const adminLoginModal = document.getElementById("adminLoginModal");
+const closeAdminLoginButton = document.getElementById("closeAdminLoginButton");
+const adminLoginForm = document.getElementById("adminLoginForm");
+const adminLoginStatus = document.getElementById("adminLoginStatus");
+const adminUsernameInput = document.getElementById("adminUsernameInput");
+const adminPasswordInput = document.getElementById("adminPasswordInput");
+const mainNav = document.getElementById("mainNav");
+const bottomNav = document.getElementById("bottomNav");
+const themeToggle = document.getElementById("themeToggle");
+const themeToggleLabel = document.getElementById("themeToggleLabel");
+const resetOrderButton = document.getElementById("resetOrderButton");
+const sortList = document.getElementById("sortList");
+const refreshStatusButton = document.getElementById("refreshStatusButton");
+const copyIpButton = document.getElementById("copyIpButton");
+const copyIpButtonLabel = document.getElementById("copyIpButtonLabel");
+const modpackNotice = document.getElementById("modpackNotice");
+const modsGrid = document.getElementById("modsGrid");
+const refreshNewsButton = document.getElementById("refreshNewsButton");
+const newsNotice = document.getElementById("newsNotice");
+const newsFeed = document.getElementById("newsFeed");
+const adminStatusChip = document.getElementById("adminStatusChip");
+const adminAuthButton = document.getElementById("adminAuthButton");
+const adminLockedNotice = document.getElementById("adminLockedNotice");
+const adminPanelContent = document.getElementById("adminPanelContent");
+const adminSessionText = document.getElementById("adminSessionText");
+const adminPostForm = document.getElementById("adminPostForm");
+const adminPostTitle = document.getElementById("adminPostTitle");
+const adminPostMarkdown = document.getElementById("adminPostMarkdown");
+const adminMediaInput = document.getElementById("adminMediaInput");
+const adminPostSubmitLabel = document.getElementById("adminPostSubmitLabel");
+const adminEditorTitle = document.getElementById("adminEditorTitle");
+const cancelEditButton = document.getElementById("cancelEditButton");
+const adminPostStatus = document.getElementById("adminPostStatus");
+const existingMediaSection = document.getElementById("existingMediaSection");
+const existingMediaGrid = document.getElementById("existingMediaGrid");
+const adminPostsList = document.getElementById("adminPostsList");
+const adminLockedLoginButton = document.getElementById("adminLockedLoginButton");
+const pendingMediaList = document.getElementById("pendingMediaList");
+const clearCacheButton = document.getElementById("clearCacheButton");
+const cacheStatusText = document.getElementById("cacheStatusText");
+const mapFrames = [...document.querySelectorAll("[data-map-frame]")];
+let pendingUploadFiles = [];
+const cacheState = loadCacheState();
+let cacheCleanupTimer = 0;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return {
+      activeTab: parsed.activeTab || "home",
+      theme: parsed.theme === "light" ? "light" : "dark",
+      sidebarCollapsed: Boolean(parsed.sidebarCollapsed),
+      sidebarOrder: sanitizeOrder(parsed.sidebarOrder)
+    };
+  } catch {
+    return {
+      activeTab: "home",
+      theme: "dark",
+      sidebarCollapsed: false,
+      sidebarOrder: [...DEFAULT_TAB_ORDER]
+    };
+  }
+}
+
+function loadAdminSession() {
+  try {
+    const raw = sessionStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return { token: "", username: "", expiresAt: "" };
+    const parsed = JSON.parse(raw);
+    return {
+      token: parsed.token || "",
+      username: parsed.username || "",
+      expiresAt: parsed.expiresAt || ""
+    };
+  } catch {
+    return { token: "", username: "", expiresAt: "" };
+  }
+}
+
+function loadCacheState() {
+  try {
+    const raw = localStorage.getItem(CACHE_META_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    const lastClearedAt = Number(parsed.lastClearedAt || 0);
+    return {
+      lastClearedAt: Number.isFinite(lastClearedAt) ? lastClearedAt : 0,
+      mapBust: String(parsed.mapBust || (lastClearedAt > 0 ? lastClearedAt : Date.now()))
+    };
+  } catch {
+    return {
+      lastClearedAt: 0,
+      mapBust: String(Date.now())
+    };
+  }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+}
+
+function saveAdminSession() {
+  sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(adminState));
+}
+
+function saveCacheState() {
+  localStorage.setItem(CACHE_META_KEY, JSON.stringify(cacheState));
+}
+
+function clearAdminSession() {
+  adminState.token = "";
+  adminState.username = "";
+  adminState.expiresAt = "";
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+}
+
+function buildMapUrl() {
+  const url = new URL(MAP_URL);
+  if (cacheState.mapBust) {
+    url.searchParams.set("cache", cacheState.mapBust);
+  }
+  return url.toString();
+}
+
+function applyMapFrameSources() {
+  const nextSrc = buildMapUrl();
+  mapFrames.forEach((frame) => {
+    if (frame.src !== nextSrc) {
+      frame.src = nextSrc;
+    }
+  });
+}
+
+function renderCacheStatus(message = "") {
+  if (!cacheStatusText) return;
+  const timestamp = cacheState.lastClearedAt
+    ? `Zuletzt bereinigt: ${formatDate(cacheState.lastClearedAt)}.`
+    : "Noch nicht manuell bereinigt.";
+  cacheStatusText.textContent = [message, timestamp, "Automatisch nach 20 Minuten."]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function isProjectDataName(value) {
+  return /mcserver1523|news-server|map/i.test(String(value || ""));
+}
+
+function scheduleCacheCleanup() {
+  window.clearTimeout(cacheCleanupTimer);
+  const age = Date.now() - cacheState.lastClearedAt;
+  const delay = cacheState.lastClearedAt > 0
+    ? Math.max(0, CACHE_MAX_AGE_MS - age)
+    : 0;
+  cacheCleanupTimer = window.setTimeout(() => {
+    clearBrowserCache({ automatic: true }).catch(() => {
+      renderCacheStatus("Automatische Bereinigung fehlgeschlagen.");
+      scheduleCacheCleanup();
+    });
+  }, delay);
+}
+
+async function clearCacheStorageEntries() {
+  if (!("caches" in window)) return;
+  const keys = await caches.keys();
+  const matchingKeys = keys.filter((key) => isProjectDataName(key));
+  await Promise.allSettled(matchingKeys.map((key) => caches.delete(key)));
+}
+
+async function clearIndexedDbEntries() {
+  if (!("indexedDB" in window) || typeof indexedDB.databases !== "function") return;
+  const databases = await indexedDB.databases();
+  const matchingNames = databases
+    .map((database) => database?.name)
+    .filter((name) => name && isProjectDataName(name));
+
+  await Promise.allSettled(matchingNames.map((name) => new Promise((resolve) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.onsuccess = () => resolve();
+    request.onerror = () => resolve();
+    request.onblocked = () => resolve();
+  })));
+}
+
+async function clearBrowserCache(options = {}) {
+  const automatic = Boolean(options.automatic);
+  if (clearCacheButton) {
+    clearCacheButton.disabled = true;
+    clearCacheButton.style.opacity = "0.7";
+  }
+  renderCacheStatus(automatic ? "Cache wird automatisch bereinigt." : "Cache wird bereinigt.");
+
+  try {
+    await Promise.allSettled([
+      clearCacheStorageEntries(),
+      clearIndexedDbEntries()
+    ]);
+    cacheState.lastClearedAt = Date.now();
+    cacheState.mapBust = String(cacheState.lastClearedAt);
+    saveCacheState();
+    applyMapFrameSources();
+    renderCacheStatus(automatic ? "Cache automatisch bereinigt." : "Cache geleert.");
+  } finally {
+    if (clearCacheButton) {
+      clearCacheButton.disabled = false;
+      clearCacheButton.style.opacity = "1";
+    }
+    scheduleCacheCleanup();
+  }
+}
+
+async function ensureFreshBrowserCache() {
+  const age = Date.now() - cacheState.lastClearedAt;
+  if (!cacheState.lastClearedAt || age >= CACHE_MAX_AGE_MS) {
+    await clearBrowserCache({ automatic: true });
+    return;
+  }
+  applyMapFrameSources();
+  renderCacheStatus();
+  scheduleCacheCleanup();
+}
+
+function sanitizeOrder(input) {
+  if (!Array.isArray(input)) return [...DEFAULT_TAB_ORDER];
+  const filtered = input.filter((value) => DEFAULT_TAB_ORDER.includes(value));
+  const missing = DEFAULT_TAB_ORDER.filter((value) => !filtered.includes(value));
+  return [...filtered, ...missing];
+}
+
+function isAdminLoggedIn() {
+  if (!adminState.token || !adminState.expiresAt) return false;
+  const expiresAt = new Date(adminState.expiresAt).getTime();
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+    clearAdminSession();
+    return false;
+  }
+  return true;
+}
+
+function refreshIcons() {
+  lucide.createIcons();
+}
+
+function applyTheme() {
+  const isLight = appState.theme === "light";
+  document.documentElement.classList.toggle("light", isLight);
+  document.documentElement.classList.toggle("dark", !isLight);
+  themeToggleLabel.textContent = isLight ? "Light aktiv" : "Dark aktiv";
+}
+
+function applySidebarState() {
+  const expanded = window.innerWidth > 820 ? !appState.sidebarCollapsed : false;
+  sidebar.classList.toggle("expanded", expanded);
+}
+
+function toggleSidebar() {
+  if (window.innerWidth <= 820) {
+    sidebar.classList.toggle("mobile-open");
+    mobileOverlay.classList.toggle("show");
+    return;
+  }
+  appState.sidebarCollapsed = !appState.sidebarCollapsed;
+  saveState();
+  applySidebarState();
+}
+
+function createNavButton(tabKey) {
+  const def = TAB_DEFINITIONS[tabKey];
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "nav-item";
+  button.dataset.tab = tabKey;
+  button.innerHTML = `
+    <div class="icon-box"><i data-lucide="${def.icon}" class="w-5 h-5 ${def.color}"></i></div>
+    <span class="label-text">${def.label}</span>
+  `;
+  button.addEventListener("click", () => {
+    if (tabKey === "einstellungen") {
+      openSettingsModal();
+      return;
+    }
+    switchView(tabKey);
+  });
+  return button;
+}
+
+function renderNavigation() {
+  mainNav.innerHTML = "";
+  bottomNav.innerHTML = "";
+
+  appState.sidebarOrder.forEach((tabKey) => {
+    mainNav.appendChild(createNavButton(tabKey));
+  });
+
+  if (isAdminLoggedIn()) {
+    mainNav.appendChild(createNavButton("admin"));
+  }
+
+  bottomNav.appendChild(createNavButton("einstellungen"));
+  updateActiveStates();
+  refreshIcons();
+}
+
+function switchView(tabKey) {
+  if (tabKey === "admin" && !isAdminLoggedIn()) {
+    appState.activeTab = "home";
+  } else {
+    appState.activeTab = TAB_DEFINITIONS[tabKey] ? tabKey : "home";
+  }
+  saveState();
+  updateActiveStates();
+  closeMobileSidebar();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateActiveStates() {
+  if (appState.activeTab === "admin" && !isAdminLoggedIn()) {
+    appState.activeTab = "home";
+    saveState();
+  }
+
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    const isSettings = item.dataset.tab === "einstellungen" && settingsModal.classList.contains("show");
+    item.classList.toggle("active", item.dataset.tab === appState.activeTab || isSettings);
+  });
+
+  document.querySelectorAll(".page-view").forEach((view) => {
+    view.classList.toggle("active", view.id === `view-${appState.activeTab}`);
+  });
+}
+
+function renderSortList() {
+  sortList.innerHTML = "";
+  appState.sidebarOrder.forEach((tabKey) => {
+    const def = TAB_DEFINITIONS[tabKey];
+    const index = appState.sidebarOrder.indexOf(tabKey);
+    const item = document.createElement("div");
+    item.className = "sort-item";
+    item.draggable = true;
+    item.dataset.tab = tabKey;
+    item.innerHTML = `
+      <div class="sort-item-main">
+        <i data-lucide="${def.icon}" class="w-4 h-4 ${def.color}"></i>
+        <div class="font-semibold text-[var(--text-main)]">${def.label}</div>
+      </div>
+      <div class="sort-item-actions">
+        <div class="sort-mobile-actions">
+          <button type="button" class="sort-move-btn" data-direction="up" aria-label="${def.label} nach oben" ${index === 0 ? "disabled" : ""}>
+            <i data-lucide="chevron-up" class="w-4 h-4"></i>
+          </button>
+          <button type="button" class="sort-move-btn" data-direction="down" aria-label="${def.label} nach unten" ${index === appState.sidebarOrder.length - 1 ? "disabled" : ""}>
+            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <i data-lucide="grip-vertical" class="sort-drag-handle w-4 h-4 text-[var(--text-muted)]"></i>
+      </div>
+    `;
+    item.querySelectorAll(".sort-move-btn").forEach((button) => {
+      button.addEventListener("click", () => moveTab(tabKey, button.dataset.direction));
+    });
+    item.addEventListener("pointerdown", onSortPointerDown);
+    item.addEventListener("pointermove", onSortPointerMove);
+    item.addEventListener("pointerup", onSortPointerUp);
+    item.addEventListener("pointercancel", onSortPointerCancel);
+    item.addEventListener("dragstart", onDragStart);
+    item.addEventListener("dragend", onDragEnd);
+    item.addEventListener("dragover", onDragOver);
+    item.addEventListener("dragleave", onDragLeave);
+    item.addEventListener("drop", onDrop);
+    sortList.appendChild(item);
+  });
+  refreshIcons();
+}
+
+let draggedTab = null;
+let touchDragState = null;
+
+function reorderSidebarTabs(movedTab, targetTab) {
+  if (!movedTab || !targetTab || movedTab === targetTab) return;
+  const nextOrder = [...appState.sidebarOrder];
+  const from = nextOrder.indexOf(movedTab);
+  const to = nextOrder.indexOf(targetTab);
+  if (from < 0 || to < 0) return;
+  nextOrder.splice(from, 1);
+  nextOrder.splice(to, 0, movedTab);
+  appState.sidebarOrder = nextOrder;
+  saveState();
+  renderNavigation();
+  renderSortList();
+}
+
+function moveTab(tabKey, direction) {
+  const currentIndex = appState.sidebarOrder.indexOf(tabKey);
+  const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= appState.sidebarOrder.length) return;
+  const nextOrder = [...appState.sidebarOrder];
+  const [movedTab] = nextOrder.splice(currentIndex, 1);
+  nextOrder.splice(targetIndex, 0, movedTab);
+  appState.sidebarOrder = nextOrder;
+  saveState();
+  renderNavigation();
+  renderSortList();
+}
+
+function onDragStart(event) {
+  draggedTab = event.currentTarget.dataset.tab;
+  event.currentTarget.classList.add("dragging");
+  event.dataTransfer.effectAllowed = "move";
+}
+
+function onDragEnd(event) {
+  draggedTab = null;
+  event.currentTarget.classList.remove("dragging");
+  clearSortDragState();
+}
+
+function onDragOver(event) {
+  event.preventDefault();
+  event.currentTarget.classList.add("drag-over");
+}
+
+function onDragLeave(event) {
+  event.currentTarget.classList.remove("drag-over");
+}
+
+function onDrop(event) {
+  event.preventDefault();
+  const targetTab = event.currentTarget.dataset.tab;
+  event.currentTarget.classList.remove("drag-over");
+  reorderSidebarTabs(draggedTab, targetTab);
+  draggedTab = null;
+}
+
+function clearSortDragState() {
+  document.querySelectorAll(".sort-item").forEach((item) => {
+    item.classList.remove("drag-over", "touch-dragging");
+  });
+}
+
+function onSortPointerDown(event) {
+  if (!["touch", "pen"].includes(event.pointerType)) return;
+  if (event.target.closest(".sort-move-btn")) return;
+  touchDragState = {
+    pointerId: event.pointerId,
+    draggedTab: event.currentTarget.dataset.tab,
+    sourceItem: event.currentTarget,
+    activeTargetTab: event.currentTarget.dataset.tab,
+    moved: false,
+    startX: event.clientX,
+    startY: event.clientY
+  };
+  event.currentTarget.setPointerCapture(event.pointerId);
+}
+
+function onSortPointerMove(event) {
+  if (!touchDragState || touchDragState.pointerId !== event.pointerId) return;
+  const moveDistance = Math.hypot(event.clientX - touchDragState.startX, event.clientY - touchDragState.startY);
+  if (!touchDragState.moved && moveDistance < 8) return;
+  touchDragState.moved = true;
+  clearSortDragState();
+  touchDragState.sourceItem.classList.add("touch-dragging");
+
+  const hoveredElement = document.elementFromPoint(event.clientX, event.clientY);
+  const hoveredItem = hoveredElement ? hoveredElement.closest(".sort-item") : null;
+  if (!hoveredItem) return;
+  hoveredItem.classList.add("drag-over");
+  touchDragState.activeTargetTab = hoveredItem.dataset.tab;
+  event.preventDefault();
+}
+
+function onSortPointerUp(event) {
+  if (!touchDragState || touchDragState.pointerId !== event.pointerId) return;
+  const { draggedTab: touchDraggedTab, activeTargetTab, moved } = touchDragState;
+  touchDragState = null;
+  clearSortDragState();
+  if (moved) reorderSidebarTabs(touchDraggedTab, activeTargetTab);
+}
+
+function onSortPointerCancel(event) {
+  if (!touchDragState || touchDragState.pointerId !== event.pointerId) return;
+  touchDragState = null;
+  clearSortDragState();
+}
+
+function closeMobileSidebar() {
+  sidebar.classList.remove("mobile-open");
+  mobileOverlay.classList.remove("show");
+}
+
+function openSettingsModal() {
+  settingsModal.classList.add("show");
+  closeMobileSidebar();
+  updateActiveStates();
+}
+
+function closeSettingsModal() {
+  settingsModal.classList.remove("show");
+  updateActiveStates();
+}
+
+function openAdminLoginModal() {
+  adminLoginStatus.textContent = "";
+  adminPasswordInput.value = "";
+  adminLoginModal.classList.add("show");
+  closeSettingsModal();
+}
+
+function closeAdminLoginModal() {
+  adminLoginModal.classList.remove("show");
+}
+
+function updateAdminUi() {
+  const loggedIn = isAdminLoggedIn();
+  adminStatusChip.textContent = loggedIn ? `Eingeloggt als ${adminState.username}` : "Nicht eingeloggt";
+  adminAuthButton.innerHTML = loggedIn
+    ? '<i data-lucide="log-out" class="w-4 h-4"></i>Ausloggen'
+    : '<i data-lucide="shield-lock" class="w-4 h-4"></i>Admin Login';
+
+  adminLockedNotice.classList.toggle("is-hidden", loggedIn);
+  adminPanelContent.classList.toggle("is-hidden", !loggedIn);
+  adminSessionText.textContent = loggedIn
+    ? `Eingeloggt als ${adminState.username}`
+    : "Bitte melde dich als Admin an.";
+
+  if (!loggedIn && appState.activeTab === "admin") {
+    switchView("home");
+  }
+
+  renderNavigation();
+  refreshIcons();
+}
+
+async function fetchServerStatus() {
+  const endpoint = `https://api.mcstatus.io/v2/status/java/${encodeURIComponent(`${SERVER_IP}:${SERVER_PORT}`)}`;
+  const heroStatus = document.getElementById("heroStatus");
+  const heroPlayers = document.getElementById("heroPlayers");
+  const homeStatus = document.getElementById("homeStatus");
+  const homeLatency = document.getElementById("homeLatency");
+  const serverMotd = document.getElementById("serverMotd");
+  const serverIcon = document.getElementById("serverIcon");
+  const motdBadge = document.getElementById("motdBadge");
+
+  heroStatus.textContent = "Wird geladen...";
+  heroPlayers.textContent = "-";
+  homeLatency.textContent = "Latenz wird geprüft";
+  refreshStatusButton.disabled = true;
+  refreshStatusButton.style.opacity = "0.7";
+  serverIcon.src = PACK_ICON;
+  serverIcon.style.filter = "grayscale(100%)";
+
+  try {
+    const response = await fetch(endpoint, { headers: { accept: "application/json" } });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    const data = await response.json();
+    const online = Boolean(data.online);
+    const playersOnline = data.players?.online ?? 0;
+    const playersMax = data.players?.max ?? "?";
+    const latencyValue = Number.isFinite(data.latency) ? Math.round(data.latency) : null;
+    const ping = latencyValue !== null ? `${latencyValue} ms` : "-";
+    const motd = data.motd?.clean || data.motd?.html?.replace(/<[^>]*>/g, " ") || "Keine MOTD verfügbar";
+
+    heroStatus.textContent = online ? "Online" : "Offline";
+    heroPlayers.textContent = online ? `${playersOnline} / ${playersMax}` : "0 / 0";
+    homeStatus.textContent = online ? "Server online" : "Server offline";
+    homeLatency.textContent = online ? (ping === "-" ? "Ping ohne Wert" : ping) : "Server offline";
+    serverMotd.textContent = motd.trim();
+    motdBadge.textContent = online ? "Live" : "Offline";
+
+    if (online) {
+      serverIcon.style.filter = "none";
+      serverIcon.src = data.icon || PACK_ICON;
+    } else {
+      serverIcon.src = PACK_ICON;
+      serverIcon.style.filter = "grayscale(100%)";
+    }
+  } catch {
+    heroStatus.textContent = "Nicht erreichbar";
+    heroPlayers.textContent = "-";
+    homeStatus.textContent = "Verbindung fehlgeschlagen";
+    homeLatency.textContent = "Bitte später erneut versuchen";
+    serverMotd.textContent = "Status konnte nicht geladen werden.";
+    motdBadge.textContent = "Fehler";
+    serverIcon.src = PACK_ICON;
+    serverIcon.style.filter = "grayscale(100%)";
+  } finally {
+    refreshStatusButton.disabled = false;
+    refreshStatusButton.style.opacity = "1";
+  }
+}
+
+async function parseModpack() {
+  modpackNotice.textContent = "Modliste wird geladen...";
+  modsGrid.innerHTML = "";
+
+  try {
+    const response = await fetch(MODPACK_URL);
+    if (!response.ok) throw new Error("Download fehlgeschlagen");
+    const buffer = await response.arrayBuffer();
+    const zip = await JSZip.loadAsync(buffer);
+    const indexFile = zip.file("modrinth.index.json");
+    if (!indexFile) throw new Error("Kein modrinth.index.json gefunden");
+
+    const indexRaw = await indexFile.async("string");
+    const manifest = JSON.parse(indexRaw);
+    const files = Array.isArray(manifest.files) ? manifest.files : [];
+    if (!files.length) throw new Error("Keine Mod-Einträge gefunden");
+
+    const projectIds = [...new Set(files.map((file) => extractProjectId(file)).filter(Boolean))];
+    const projectMap = await loadModrinthProjects(projectIds);
+    const cards = files.map((file) => buildModCardData(file, projectMap)).filter(Boolean);
+    renderModCards(cards);
+    modpackNotice.textContent = `${cards.length} Mods geladen.`;
+  } catch {
+    modpackNotice.textContent = "Aktuell ist `assets/modpack.mrpack` nur eine Platzhalter-Datei.";
+    modsGrid.innerHTML = getFallbackModCards();
+    refreshIcons();
+  }
+}
+
+function extractProjectId(file) {
+  const explicitId = file?.env?.project_id || file?.project_id;
+  if (explicitId) return explicitId;
+  const download = Array.isArray(file?.downloads) ? file.downloads[0] : "";
+  const match = typeof download === "string" ? download.match(/modrinth\.com\/data\/([^/]+)/) : null;
+  return match?.[1] || null;
+}
+
+async function loadModrinthProjects(projectIds) {
+  if (!projectIds.length) return new Map();
+  try {
+    const response = await fetch(`https://api.modrinth.com/v2/projects?ids=${encodeURIComponent(JSON.stringify(projectIds))}`);
+    if (!response.ok) throw new Error("API Fehler");
+    const projects = await response.json();
+    return new Map(projects.map((project) => [project.id, project]));
+  } catch {
+    return new Map();
+  }
+}
+
+function buildModCardData(file, projectMap) {
+  const projectId = extractProjectId(file);
+  const project = projectMap.get(projectId);
+  const filename = file?.path || "Unbekannte Mod";
+  const name = project?.title || beautifyFilename(filename);
+  const description = project?.description || "Mod aus dem Server-Modpack";
+  const icon = project?.icon_url || generateLetterIcon(name);
+  const slug = project?.slug;
+  const href = slug ? `https://modrinth.com/mod/${slug}` : `https://modrinth.com/mod/${projectId || ""}`;
+  return {
+    name,
+    description,
+    icon,
+    href,
+    categories: project?.categories?.slice(0, 2) || ["Modpack"]
+  };
+}
+
+function generateLetterIcon(name) {
+  const letter = (name || "M").trim().charAt(0).toUpperCase();
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%234f46e5'/%3E%3Cstop offset='1' stop-color='%2310b981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='url(%23g)'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial, sans-serif' font-size='28' fill='white'%3E${encodeURIComponent(letter)}%3C/text%3E%3C/svg%3E`;
+}
+
+function beautifyFilename(value) {
+  return String(value).split("/").pop().replace(/\.(jar|mrpack)$/i, "").replace(/[-_]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function renderModCards(cards) {
+  modsGrid.innerHTML = cards.map((card) => `
+    <a href="${card.href}" target="_blank" rel="noreferrer" class="mod-card">
+      <div class="flex items-start gap-4">
+        <img src="${card.icon}" alt="${escapeHtml(card.name)} Icon" class="h-14 w-14 rounded-2xl border border-[color:var(--card-border)] bg-black/20 object-cover p-1">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="font-extrabold text-[var(--text-main)]">${escapeHtml(card.name)}</div>
+              <div class="mt-2 text-sm leading-6 text-[var(--text-soft)]">${escapeHtml(card.description)}</div>
+            </div>
+            <span class="mod-link-icon" aria-hidden="true">
+              <i data-lucide="external-link"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            ${card.categories.map((category) => `<span class="chip">${escapeHtml(category)}</span>`).join("")}
+          </div>
+        </div>
+      </div>
+    </a>
+  `).join("");
+  refreshIcons();
+}
+
+function getFallbackModCards() {
+  const placeholders = [
+    {
+      name: "Modliste folgt",
+      description: "Sobald ein echtes Modrinth-Pack vorhanden ist, erscheint die Liste hier.",
+      icon: generateLetterIcon("M"),
+      href: "https://modrinth.com/",
+      categories: ["Hinweis"]
+    },
+    {
+      name: "Download",
+      description: "Die `.mrpack` Datei kann bereits heruntergeladen werden.",
+      icon: generateLetterIcon("D"),
+      href: MODPACK_URL,
+      categories: ["Download"]
+    }
+  ];
+  return placeholders.map((card) => `
+    <a href="${card.href}" ${card.href.startsWith("http") ? 'target="_blank" rel="noreferrer"' : "download"} class="mod-card">
+      <div class="flex items-start gap-4">
+        <img src="${card.icon}" alt="${escapeHtml(card.name)} Icon" class="h-14 w-14 rounded-2xl border border-[color:var(--card-border)] bg-black/20 object-cover p-1">
+        <div class="min-w-0 flex-1">
+          <div class="font-extrabold text-[var(--text-main)]">${escapeHtml(card.name)}</div>
+          <div class="mt-2 text-sm leading-6 text-[var(--text-soft)]">${escapeHtml(card.description)}</div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            ${card.categories.map((category) => `<span class="chip">${escapeHtml(category)}</span>`).join("")}
+          </div>
+        </div>
+      </div>
+    </a>
+  `).join("");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, "&#096;");
+}
+
+function resolveApiUrl(path) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${NEWS_API_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function resolveNewsApiUrl(path) {
+  if (!path) return NEWS_API_BASE;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${NEWS_API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function resolveNewsMediaUrl(path) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith("/news-api/")) return `${NEWS_API_ORIGIN}${path}`;
+  return `${NEWS_API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function getNewsMediaSource(entry) {
+  const fileName = String(entry?.fileName || "").trim();
+  if (fileName) {
+    return resolveNewsApiUrl(`/media/${encodeURIComponent(fileName)}`);
+  }
+  return resolveNewsMediaUrl(entry?.url || "");
+}
+
+function describeFetchError(context, error) {
+  const message = String(error?.message || "");
+  if (/failed to fetch|networkerror|load failed/i.test(message)) {
+    if (context === "news") {
+      return "News-API nicht erreichbar. Prüfe Proxy, HTTPS und `/news-api/posts.json`.";
+    }
+    if (context === "admin") {
+      return "Admin-API blockiert oder nicht erreichbar. Prüfe `NEWS_ALLOWED_ORIGINS` und starte den News-Server neu.";
+    }
+    return "API nicht erreichbar. Prüfe Proxy, HTTPS und Server-Status.";
+  }
+  return message || "Unbekannter Fehler";
+}
+
+async function fetchNewsFeed() {
+  newsNotice.textContent = "News werden geladen...";
+  refreshNewsButton.disabled = true;
+  refreshNewsButton.style.opacity = "0.7";
+  try {
+    const response = await fetch(resolveNewsApiUrl("/api/posts"));
+    if (!response.ok) throw new Error("Feed konnte nicht geladen werden");
+    const data = await response.json();
+    newsState.posts = Array.isArray(data.posts) ? data.posts : [];
+    renderNewsFeed(newsState.posts);
+    renderAdminPostsList(newsState.posts);
+    newsNotice.textContent = newsState.posts.length ? `${newsState.posts.length} Posts geladen.` : "Noch keine Posts vorhanden.";
+  } catch (error) {
+    newsNotice.textContent = "News-Feed ist aktuell nicht erreichbar.";
+    newsFeed.innerHTML = `<div class="notice">${escapeHtml(describeFetchError("news", error))}</div>`;
+    renderAdminPostsList([]);
+  } finally {
+    refreshNewsButton.disabled = false;
+    refreshNewsButton.style.opacity = "1";
+  }
+}
+
+function renderNewsFeed(posts) {
+  if (!posts.length) {
+    newsFeed.innerHTML = `<div class="panel empty-state">Noch keine News vorhanden.</div>`;
+    return;
+  }
+
+  newsFeed.innerHTML = posts.map((post) => `
+    <article class="panel news-card">
+      <div class="news-card-header">
+        <div>
+          <h2 class="news-title">${escapeHtml(post.title)}</h2>
+        </div>
+      </div>
+      <div class="news-markdown markdown-body">${renderMarkdown(post.markdown || "")}</div>
+      ${renderNewsMedia(post.media || [])}
+      <div class="news-date">${formatDate(post.createdAt, false)}</div>
+    </article>
+  `).join("");
+}
+
+function renderNewsMedia(media) {
+  if (!media.length) return "";
+  return `
+    <div class="news-media-grid">
+      ${media.map((entry) => {
+        const src = getNewsMediaSource(entry);
+        if (getMediaKind(entry) === "video") {
+          return `
+            <div class="news-media-card">
+              <video controls preload="metadata" playsinline src="${escapeAttribute(src)}"></video>
+            </div>
+          `;
+        }
+        return `
+          <a href="${escapeAttribute(src)}" target="_blank" rel="noreferrer" class="news-media-card">
+            <img src="${escapeAttribute(src)}" alt="${escapeAttribute(entry.originalName || "Post Bild")}" loading="lazy" referrerpolicy="no-referrer">
+          </a>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderMarkdown(markdown) {
+  if (!markdown.trim()) return "";
+  if (window.marked && window.DOMPurify) {
+    const raw = window.marked.parse(markdown, {
+      breaks: true,
+      gfm: true
+    });
+    return window.DOMPurify.sanitize(raw);
+  }
+  return `<p>${escapeHtml(markdown).replace(/\n/g, "<br>")}</p>`;
+}
+
+function formatDate(value, includeTime = true) {
+  try {
+    return new Intl.DateTimeFormat("de-DE", {
+      dateStyle: "medium",
+      ...(includeTime ? { timeStyle: "short" } : {})
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+}
+
+function getMediaKind(entry) {
+  const type = String(entry?.type || "").toLowerCase();
+  const mimeType = String(entry?.mimeType || "").toLowerCase();
+  const originalName = String(entry?.originalName || entry?.fileName || "").toLowerCase();
+  if (type === "video" || mimeType.startsWith("video/") || /\.(mp4|webm|mov|m4v)$/i.test(originalName)) return "video";
+  return "image";
+}
+
+function renderAdminPostsList(posts) {
+  if (!isAdminLoggedIn()) {
+    adminPostsList.innerHTML = "";
+    return;
+  }
+
+  if (!posts.length) {
+    adminPostsList.innerHTML = `<div class="empty-state small-empty">Noch keine Posts zum Bearbeiten.</div>`;
+    return;
+  }
+
+  adminPostsList.innerHTML = posts.map((post) => `
+    <article class="admin-post-card">
+      <div class="admin-post-card-head">
+        <div>
+          <div class="admin-post-title">${escapeHtml(post.title)}</div>
+          <div class="news-meta">
+            <span>${formatDate(post.createdAt)}</span>
+            <span>${(post.media || []).length} Medien</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-compact" data-action="edit" data-post-id="${escapeAttribute(post.id)}">
+            <i data-lucide="pencil" class="w-4 h-4"></i>
+            Bearbeiten
+          </button>
+          <button type="button" class="btn btn-compact btn-danger" data-action="delete" data-post-id="${escapeAttribute(post.id)}">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Löschen
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join("");
+
+  adminPostsList.querySelectorAll("[data-action='edit']").forEach((button) => {
+    button.addEventListener("click", () => startEditingPost(button.dataset.postId));
+  });
+  adminPostsList.querySelectorAll("[data-action='delete']").forEach((button) => {
+    button.addEventListener("click", () => deletePost(button.dataset.postId));
+  });
+
+  refreshIcons();
+}
+
+function startEditingPost(postId) {
+  const post = newsState.posts.find((entry) => entry.id === postId);
+  if (!post) return;
+  adminEditorState.editingId = post.id;
+  adminEditorState.removeMedia = new Set();
+  adminEditorTitle.textContent = "Post bearbeiten";
+  adminPostSubmitLabel.textContent = "Änderungen speichern";
+  cancelEditButton.classList.remove("is-hidden");
+  adminPostTitle.value = post.title || "";
+  adminPostMarkdown.value = post.markdown || "";
+  adminMediaInput.value = "";
+  renderExistingMedia(post.media || []);
+  switchView("admin");
+}
+
+function resetAdminEditor() {
+  adminEditorState.editingId = null;
+  adminEditorState.removeMedia = new Set();
+  pendingUploadFiles = [];
+  adminEditorTitle.textContent = "Neuen Post erstellen";
+  adminPostSubmitLabel.textContent = "Post erstellen";
+  cancelEditButton.classList.add("is-hidden");
+  adminPostForm.reset();
+  existingMediaSection.classList.add("is-hidden");
+  existingMediaGrid.innerHTML = "";
+  renderPendingMediaList();
+  adminPostStatus.textContent = "";
+}
+
+function renderExistingMedia(media) {
+  if (!media.length) {
+    existingMediaSection.classList.add("is-hidden");
+    existingMediaGrid.innerHTML = "";
+    return;
+  }
+
+  existingMediaSection.classList.remove("is-hidden");
+  existingMediaGrid.innerHTML = media.map((entry) => {
+    const src = getNewsMediaSource(entry);
+    const markedForRemoval = adminEditorState.removeMedia.has(entry.fileName);
+    return `
+      <div class="existing-media-card ${markedForRemoval ? "marked-remove" : ""}">
+        ${getMediaKind(entry) === "video"
+          ? `<video controls preload="metadata" playsinline src="${escapeAttribute(src)}"></video>`
+          : `<img src="${escapeAttribute(src)}" alt="${escapeAttribute(entry.originalName || "Post Medium")}" loading="lazy" referrerpolicy="no-referrer">`
+        }
+        <button type="button" class="toggle-remove-btn ${markedForRemoval ? "danger-active" : ""}" data-file-name="${escapeAttribute(entry.fileName)}">
+          ${markedForRemoval ? "Wird entfernt" : "Behalten"}
+        </button>
+      </div>
+    `;
+  }).join("");
+
+  existingMediaGrid.querySelectorAll(".toggle-remove-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const fileName = button.dataset.fileName;
+      if (adminEditorState.removeMedia.has(fileName)) {
+        adminEditorState.removeMedia.delete(fileName);
+      } else {
+        adminEditorState.removeMedia.add(fileName);
+      }
+      const currentPost = newsState.posts.find((entry) => entry.id === adminEditorState.editingId);
+      renderExistingMedia(currentPost?.media || []);
+    });
+  });
+}
+
+function formatFileSize(bytes) {
+  const value = Number(bytes || 0);
+  if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function fileFingerprint(file) {
+  return `${file.name}::${file.size}::${file.lastModified}`;
+}
+
+function syncPendingFilesInput() {
+  try {
+    const transfer = new DataTransfer();
+    pendingUploadFiles.forEach((file) => transfer.items.add(file));
+    adminMediaInput.files = transfer.files;
+  } catch {
+    // Fallback: browser keeps the latest multi-selection even if DataTransfer is unavailable.
+  }
+}
+
+function renderPendingMediaList() {
+  if (!pendingUploadFiles.length) {
+    pendingMediaList.innerHTML = "";
+    pendingMediaList.classList.add("is-hidden");
+    return;
+  }
+
+  pendingMediaList.classList.remove("is-hidden");
+  pendingMediaList.innerHTML = pendingUploadFiles.map((file, index) => `
+    <div class="upload-file-item">
+      <div class="upload-file-copy">
+        <div class="upload-file-name">${escapeHtml(file.name)}</div>
+        <div class="upload-file-meta">${escapeHtml(file.type || "Datei")} · ${formatFileSize(file.size)}</div>
+      </div>
+      <button type="button" class="btn btn-compact" data-remove-pending-index="${index}">
+        Entfernen
+      </button>
+    </div>
+  `).join("");
+
+  pendingMediaList.querySelectorAll("[data-remove-pending-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const index = Number(button.dataset.removePendingIndex);
+      pendingUploadFiles.splice(index, 1);
+      syncPendingFilesInput();
+      renderPendingMediaList();
+    });
+  });
+}
+
+async function handleAdminLogin(event) {
+  event.preventDefault();
+  adminLoginStatus.textContent = "Login wird geprüft...";
+
+  try {
+    const response = await fetch(resolveNewsApiUrl("/api/admin/login"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: adminUsernameInput.value.trim(),
+        password: adminPasswordInput.value
+      })
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || "Login fehlgeschlagen");
+    }
+
+    adminState.token = data.token;
+    adminState.username = data.username;
+    adminState.expiresAt = data.expiresAt;
+    saveAdminSession();
+    closeAdminLoginModal();
+    updateAdminUi();
+    switchView("admin");
+    await fetchNewsFeed();
+  } catch (error) {
+    adminLoginStatus.textContent = describeFetchError("admin", error);
+  }
+}
+
+async function logoutAdmin() {
+  try {
+    if (adminState.token) {
+      await fetch(resolveNewsApiUrl("/api/admin/logout"), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${adminState.token}`
+        }
+      }).catch(() => {});
+    }
+  } finally {
+    clearAdminSession();
+    resetAdminEditor();
+    updateAdminUi();
+  }
+}
+
+async function handleAdminPostSubmit(event) {
+  event.preventDefault();
+  if (!isAdminLoggedIn()) {
+    adminPostStatus.textContent = "Bitte zuerst einloggen.";
+    return;
+  }
+
+  const title = adminPostTitle.value.trim();
+  const markdown = adminPostMarkdown.value.trim();
+  if (!title) {
+    adminPostStatus.textContent = "Bitte einen Titel eingeben.";
+    return;
+  }
+  if (!markdown) {
+    adminPostStatus.textContent = "Bitte Inhalt für den Post eingeben.";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("markdown", markdown);
+  formData.append("removeMedia", JSON.stringify([...adminEditorState.removeMedia]));
+  pendingUploadFiles.forEach((file) => formData.append("media", file));
+
+  adminPostStatus.textContent = adminEditorState.editingId ? "Post wird gespeichert..." : "Post wird erstellt...";
+
+  const endpoint = adminEditorState.editingId
+    ? resolveNewsApiUrl(`/api/posts/${encodeURIComponent(adminEditorState.editingId)}`)
+    : resolveNewsApiUrl("/api/posts");
+  const method = adminEditorState.editingId ? "PUT" : "POST";
+
+  try {
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        Authorization: `Bearer ${adminState.token}`
+      },
+      body: formData
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || "Post konnte nicht gespeichert werden");
+    }
+    adminPostStatus.textContent = adminEditorState.editingId ? "Post aktualisiert." : "Post erstellt.";
+    resetAdminEditor();
+    await fetchNewsFeed();
+  } catch (error) {
+    if (responseNeedsLogout(error)) return;
+    adminPostStatus.textContent = describeFetchError("admin", error);
+  }
+}
+
+function responseNeedsLogout(error) {
+  if (!error || typeof error.message !== "string") return false;
+  if (!/token|unauthorized|autoris|auth/i.test(error.message)) return false;
+  logoutAdmin();
+  return true;
+}
+
+async function deletePost(postId) {
+  if (!isAdminLoggedIn()) return;
+  const post = newsState.posts.find((entry) => entry.id === postId);
+  if (!post) return;
+  const confirmed = window.confirm(`Post "${post.title}" wirklich löschen?`);
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch(resolveNewsApiUrl(`/api/posts/${encodeURIComponent(postId)}`), {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${adminState.token}`
+      }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || "Post konnte nicht gelöscht werden");
+    }
+    if (adminEditorState.editingId === postId) {
+      resetAdminEditor();
+    }
+    await fetchNewsFeed();
+  } catch (error) {
+    if (responseNeedsLogout(error)) return;
+    adminPostStatus.textContent = describeFetchError("admin", error);
+  }
+}
+
+async function copyServerIp() {
+  try {
+    await navigator.clipboard.writeText(SERVER_IP);
+    copyIpButtonLabel.textContent = "IP kopiert";
+    setTimeout(() => {
+      copyIpButtonLabel.textContent = "IP kopieren";
+    }, 1800);
+  } catch {
+    copyIpButtonLabel.textContent = "Nicht möglich";
+    setTimeout(() => {
+      copyIpButtonLabel.textContent = "IP kopieren";
+    }, 1800);
+  }
+}
+
+window.toggleSidebar = toggleSidebar;
+
+mobileMenuButton.addEventListener("click", toggleSidebar);
+mobileOverlay.addEventListener("click", closeMobileSidebar);
+settingsModal.addEventListener("click", closeSettingsModal);
+closeSettingsButton.addEventListener("click", closeSettingsModal);
+adminLoginModal.addEventListener("click", closeAdminLoginModal);
+closeAdminLoginButton.addEventListener("click", closeAdminLoginModal);
+adminLoginForm.addEventListener("submit", handleAdminLogin);
+
+themeToggle.addEventListener("click", () => {
+  appState.theme = appState.theme === "dark" ? "light" : "dark";
+  saveState();
+  applyTheme();
+});
+
+resetOrderButton.addEventListener("click", () => {
+  appState.sidebarOrder = [...DEFAULT_TAB_ORDER];
+  saveState();
+  renderNavigation();
+  renderSortList();
+});
+
+adminAuthButton.addEventListener("click", () => {
+  if (isAdminLoggedIn()) {
+    logoutAdmin();
+  } else {
+    openAdminLoginModal();
+  }
+});
+
+adminLockedLoginButton.addEventListener("click", openAdminLoginModal);
+refreshStatusButton.addEventListener("click", fetchServerStatus);
+copyIpButton.addEventListener("click", copyServerIp);
+refreshNewsButton.addEventListener("click", fetchNewsFeed);
+clearCacheButton.addEventListener("click", () => {
+  clearBrowserCache().catch(() => {
+    renderCacheStatus("Cache konnte nicht vollständig bereinigt werden.");
+  });
+});
+adminMediaInput.addEventListener("change", () => {
+  const seen = new Set(pendingUploadFiles.map(fileFingerprint));
+  [...adminMediaInput.files].forEach((file) => {
+    const fingerprint = fileFingerprint(file);
+    if (seen.has(fingerprint)) return;
+    seen.add(fingerprint);
+    pendingUploadFiles.push(file);
+  });
+  syncPendingFilesInput();
+  renderPendingMediaList();
+});
+adminPostForm.addEventListener("submit", handleAdminPostSubmit);
+cancelEditButton.addEventListener("click", resetAdminEditor);
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 820) closeMobileSidebar();
+  applySidebarState();
+});
+
+if (!TAB_DEFINITIONS[appState.activeTab]) appState.activeTab = "home";
+
+applyTheme();
+applySidebarState();
+renderNavigation();
+renderSortList();
+updateActiveStates();
+updateAdminUi();
+ensureFreshBrowserCache();
+parseModpack();
+fetchServerStatus();
+fetchNewsFeed();
+refreshIcons();
+  </script>
+</body>
+</html>
